@@ -6,7 +6,7 @@ import { BookDTO } from './dto/create-book.dto';
 export class BookService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: BookDTO) {
+  async create(data: BookDTO): Promise<BookDTO> {
     const bookExists: BookDTO = await this.prisma.book.findFirst({
       where: { bar_code: data.bar_code },
     });
@@ -37,11 +37,11 @@ export class BookService {
     return book;
   }
 
-  async findAll() {
+  async findAll(): Promise<BookDTO[]> {
     return this.prisma.book.findMany();
   }
 
-  async update(id: string, data: BookDTO) {
+  async update(id: string, data: BookDTO): Promise<HttpException> {
     const bookExists: BookDTO = await this.prisma.book.findUnique({
       where: { id: Number(id) },
     });
@@ -63,7 +63,7 @@ export class BookService {
     );
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<HttpException> {
     const bookExists: BookDTO = await this.prisma.book.findUnique({
       where: { id: Number(id) },
     });
