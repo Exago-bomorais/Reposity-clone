@@ -14,7 +14,7 @@ export class AuthorService {
 
     if (authorExists) {
       throw new HttpException(
-        { msg: 'Author já cadastrado', author: `${authorExists}` },
+        { msg: 'Author já cadastrado', author: `${authorExists.name}` },
         HttpStatus.BAD_REQUEST,
       );
     }

@@ -23,7 +23,7 @@ model Book{
 model Author{
   id Int @id @default(autoincrement())
   name String @db.VarChar(25)
-  age BigInt 
+  age Int 
   book Book @relation(fields: [userId], references: [id])
   userId Int @unique
 
