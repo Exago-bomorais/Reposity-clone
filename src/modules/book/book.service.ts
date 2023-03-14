@@ -1,68 +1,79 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { throws } from 'assert';
 import { PrismaService } from '../../database/PrismaService';
 import { BookDTO } from './dto/create-book.dto';
 
 @Injectable()
 export class BookService {
-    constructor(private prisma: PrismaService ) {}
+  constructor(private prisma: PrismaService) {}
 
-    async create (data: BookDTO){
-        const bookExists: BookDTO = await this.prisma.book.findFirst({where:{bar_code: data.bar_code}})
+  async create(data: BookDTO) {
+    const bookExists: BookDTO = await this.prisma.book.findFirst({
+      where: { bar_code: data.bar_code },
+    });
 
-        if(bookExists){
-            throw new HttpException(`Livro já cadastrado ${data.title.toLowerCase()}`, HttpStatus.NOT_ACCEPTABLE )
-        }
-
-        const book = await this.prisma.book.create({data})
-
-        return book
+    if (bookExists) {
+      throw new HttpException(
+        `Livro já cadastrado ${data.title.toLowerCase()}`,
+        HttpStatus.NOT_ACCEPTABLE,
+      );
     }
 
-    async findOne(id: string){
-        const book: BookDTO = await this.prisma.book.findFirst({
-            where: {
-                id: Number(id)
-        }
-    })
+    const book = await this.prisma.book.create({ data });
 
-    if(!book){
-        throw new HttpException('Livro não encontrado', HttpStatus.NOT_FOUND)
+    return book;
+  }
+
+  async findOne(id: string) {
+    const book: BookDTO = await this.prisma.book.findFirst({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    if (!book) {
+      throw new HttpException('Livro não encontrado', HttpStatus.NOT_FOUND);
     }
 
-    return book
+    return book;
+  }
 
+  async findAll() {
+    return this.prisma.book.findMany();
+  }
+
+  async update(id: string, data: BookDTO) {
+    const bookExists: BookDTO = await this.prisma.book.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!bookExists) {
+      throw new HttpException(`Livro não cadastrado`, HttpStatus.NOT_FOUND);
     }
 
-    async findAll(){
-        return this.prisma.book.findMany()
+    await this.prisma.book.update({
+      data,
+      where: {
+        id: Number(id),
+      },
+    });
+
+    throw new HttpException(
+      `Livro atualizado com sucesso`,
+      HttpStatus.ACCEPTED,
+    );
+  }
+
+  async delete(id: string) {
+    const bookExists: BookDTO = await this.prisma.book.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!bookExists) {
+      throw new HttpException(`Livro não encontrado`, HttpStatus.NOT_FOUND);
     }
 
-    async update (id: string, data: BookDTO){
-        const bookExists: BookDTO = await this.prisma.book.findUnique({where: {id: Number(id)}})
+    await this.prisma.book.delete({ where: { id: Number(id) } });
 
-        if(!bookExists){
-            throw new HttpException(`Livro não cadastrado`, HttpStatus.NOT_FOUND )
-        }
-
-        await this.prisma.book.update({data, where: {
-            id: Number(id)
-        }})
-
-        throw new HttpException(`Livro atualizado com sucesso`, HttpStatus.ACCEPTED)
-    }
-
-
-    async delete (id: string){
-        const bookExists: BookDTO = await this.prisma.book.findUnique({where: {id: Number(id)}})
-
-        if(!bookExists){
-            throw new HttpException(`Livro não encontrado`, HttpStatus.NOT_FOUND )
-        }
-
-        await this.prisma.book.delete({where: {id: Number(id)}})
-
-        throw new HttpException('Livro deletado com sucesso', HttpStatus.OK)
-    }
-
+    throw new HttpException('Livro deletado com sucesso', HttpStatus.OK);
+  }
 }
