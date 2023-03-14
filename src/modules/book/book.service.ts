@@ -38,7 +38,11 @@ export class BookService {
   }
 
   async findAll(): Promise<BookDTO[]> {
-    return this.prisma.book.findMany();
+    return this.prisma.book.findMany({
+      include: {
+        author: true,
+      },
+    });
   }
 
   async update(id: string, data: BookDTO): Promise<HttpException> {
