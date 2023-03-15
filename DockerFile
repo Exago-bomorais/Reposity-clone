@@ -1,0 +1,13 @@
+FROM node:latest
+
+WORKDIR /usr/src/api
+
+COPY . . 
+
+RUN npm install --quiet --no-optional --no-found --loglevel=error
+
+RUN npx prisma migrate dev
+
+RUN npm run build
+
+CMD ["npm", "run", "start:prod"]
