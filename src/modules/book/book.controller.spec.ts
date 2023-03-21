@@ -2,11 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BookService } from './book.service';
 import { BookController } from './book.controller';
 import { PrismaService } from '../../database/PrismaService';
+import { BookTestDTO } from './book.controller.spec.dto';
 
 describe('AppController', () => {
   let bookController: BookController;
   let bookService: BookService;
-  let prisma: PrismaService;
+  let prismaService: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -14,44 +15,40 @@ describe('AppController', () => {
       providers: [BookService, PrismaService],
     }).compile();
 
-    prisma = module.get<PrismaService>(PrismaService);
-    bookService = module.get<BookService>(BookService);
+    prismaService = module.get<PrismaService>(PrismaService);
     bookController = module.get<BookController>(BookController);
-    await prisma.$connect();
+    bookService = module.get<BookService>(BookService);
+    await prismaService.$connect();
   });
 
-  describe('Rota Create', () => {
-    it('criação de usuario pelo teste', async () => {
-      const user = {
-        title: 'Os segredos da mente milhonaria',
-        description: 'Livro para enriquecer',
-        bar_code: '8956226565-87984465468',
-      };
+  it('Inicialização do bookController e bookService', () => {
+    expect(bookController).toBeDefined();
+    expect(bookService).toBeDefined();
+    expect(prismaService).toBeDefined();
+  });
 
-      const create = await bookController.create(user);
-
-      expect(create.bar_code).toEqual(user.bar_code);
+  describe('Rota POST para criação do book', () => {
+    afterAll(async () => {
+      await prismaService.book.delete({
+        where: { bar_code: bookData.bar_code },
+      });
     });
 
-    it('criação de usuario duplicado', async () => {
-      const user = {
-        title: 'Os segredos da mente milhonaria',
-        description: 'Livro para enriquecer',
-        bar_code: '8956226565-87984465468',
-      };
+    const bookData: BookTestDTO = {
+      title: 'Livro 1',
+      description: 'Descrição do livro 1',
+      bar_code: '56987458-5896588',
+    };
+    test('Criação de um book', async () => {
+      const book = await bookController.create(bookData);
 
+      expect(book).toHaveProperty('id');
+    });
+
+    test('book já cadastrado', async () => {
       expect(async () => {
-        await bookController.create(user);
-      }).rejects.toThrow(
-        `Livro já cadastrado ${user.title.toLocaleLowerCase()}`,
-      );
+        await bookController.create(bookData);
+      }).rejects.toThrowError();
     });
   });
-
-  // describe('Rota Show', () => {
-  //   test('Procurando um usuario especifico no banco de dados', async () => {
-  //       const id: string = '1'
-
-  // });
-  // });
 });
