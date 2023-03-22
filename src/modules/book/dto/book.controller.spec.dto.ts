@@ -3,4 +3,5 @@ export type BookTestDTO = {
   title: string;
   description: string;
   bar_code: string;
+  author?: boolean | string;
 };

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BookService } from './book.service';
 import { BookController } from './book.controller';
 import { PrismaService } from '../../database/PrismaService';
-import { BookTestDTO } from './book.controller.spec.dto';
+import { BookTestDTO } from './dto/book.controller.spec.dto';
 
 describe('AppController', () => {
   let bookController: BookController;
@@ -28,12 +28,6 @@ describe('AppController', () => {
   });
 
   describe('Rota POST para criação do book', () => {
-    afterAll(async () => {
-      await prismaService.book.delete({
-        where: { bar_code: bookData.bar_code },
-      });
-    });
-
     const bookData: BookTestDTO = {
       title: 'Livro 1',
       description: 'Descrição do livro 1',
@@ -46,9 +40,61 @@ describe('AppController', () => {
     });
 
     test('book já cadastrado', async () => {
-      expect(async () => {
+      await expect(async () => {
         await bookController.create(bookData);
       }).rejects.toThrowError();
+    });
+
+    afterAll(async () => {
+      await prismaService.book.delete({
+        where: { bar_code: bookData.bar_code },
+      });
+    });
+  });
+
+  describe('Rota GET para pesquisa de um Book especifico', () => {
+    const bookTest: BookTestDTO = {
+      id: 10,
+      title: 'Testando o findOne',
+      description: 'Teste do findOne',
+      bar_code: '565595959-595959116546',
+    };
+    test('Pesquisa de um book especifico com sucesso', async () => {
+      const bookExists = await bookController.show('10');
+
+      expect(bookExists).toEqual(bookTest);
+    });
+
+    test('Pesquisa de um book especifico com falha', async () => {
+      const id = bookTest.id + 1;
+
+      await expect(async () => {
+        await bookController.show(id.toString());
+      }).rejects.toThrowError();
+    });
+  });
+
+  describe('Rota GET para pesquisar todos os Book', () => {
+    test('Pesquisando a função bookController.index com sucesso', async () => {
+      const bookTest: BookTestDTO[] = [
+        {
+          id: 10,
+          title: 'Testando o findOne',
+          description: 'Teste do findOne',
+          bar_code: '565595959-595959116546',
+          author: null,
+        },
+        {
+          id: 25,
+          title: 'Testando FindAll',
+          description: 'teste do findAll',
+          bar_code: '85698-98565221',
+          author: null,
+        },
+      ];
+      const books = await bookController.index();
+
+      expect(books).toEqual(bookTest);
     });
   });
 });
