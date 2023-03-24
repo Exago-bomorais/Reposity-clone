@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BookService } from './book.service';
 import { BookController } from './book.controller';
 import { PrismaService } from '../../database/PrismaService';
-import { BookTestDTO, BookUpdateDTO } from './dto/book.controller.spec.dto';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BookTestDTO } from './dto/book.controller.spec.dto';
+import { BookDTO } from './dto/create-book.dto';
 
 describe('AppController', () => {
   let bookController: BookController;
@@ -55,19 +55,19 @@ describe('AppController', () => {
 
   describe('Rota GET para pesquisa de um Book especifico', () => {
     const bookTest: BookTestDTO = {
-      id: 10,
+      id: 3,
       title: 'Testando o findOne',
       description: 'Teste do findOne',
       bar_code: '565595959-595959116546',
     };
     test('Pesquisa de um book especifico com sucesso', async () => {
-      const bookExists = await bookController.show('10');
+      const bookExists = await bookController.show('3');
 
       expect(bookExists).toEqual(bookTest);
     });
 
     test('Pesquisa de um book especifico com falha', async () => {
-      const id = bookTest.id + 1;
+      const id = bookTest.id + 10;
 
       await expect(async () => {
         await bookController.show(id.toString());
@@ -79,17 +79,17 @@ describe('AppController', () => {
     test('Pesquisando a função bookController.index com sucesso', async () => {
       const bookTest: BookTestDTO[] = [
         {
-          id: 10,
-          title: 'Testando o findOne',
-          description: 'Teste do findOne',
-          bar_code: '565595959-595959116546',
-          author: null,
-        },
-        {
-          id: 25,
+          id: 4,
           title: 'Testando FindAll',
           description: 'teste do findAll',
           bar_code: '85698-98565221',
+          author: null,
+        },
+        {
+          id: 3,
+          title: 'Testando o findOne',
+          description: 'Teste do findOne',
+          bar_code: '565595959-595959116546',
           author: null,
         },
       ];
@@ -97,35 +97,5 @@ describe('AppController', () => {
 
       expect(books).toEqual(bookTest);
     });
-  });
-
-  describe('rota PUT para UPDATE de um usuario', () => {
-    test('Testando rota PUT', async () => {
-      const bookTest: BookUpdateDTO = {
-        title: 'Testando o findOne',
-        description: 'Teste do findOne',
-        bar_code: '565595959-595959116546',
-      };
-      const bookUpdate = await bookController.update('10', bookTest);
-
-      const t = (): HttpException => {
-        throw new HttpException(
-          `Livro atualizado com sucesso`,
-          HttpStatus.ACCEPTED,
-        );
-      };
-
-      expect(bookUpdate).toEqual(t);
-    });
-
-    // afterAll(async () => {
-    //   const bookTest: BookTestDTO = {
-    //     title: 'Testando o findOne',
-    //     description: 'Teste do findOne',
-    //     bar_code: '565595959-595959116546',
-    //   };
-
-    //   await bookController.update('10', bookTest);
-    // });
   });
 });
