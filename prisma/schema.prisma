@@ -15,6 +15,17 @@ model Book{
   title String
   description String
   bar_code String @unique
+  author Author?
 
   @@map("books")
+}
+
+model Author{
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(25)
+  age Int 
+  book Book @relation(fields: [userId], references: [id])
+  userId Int @unique
+
+  @@map("author")
 }

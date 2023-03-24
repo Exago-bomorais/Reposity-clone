@@ -38,10 +38,14 @@ export class BookService {
   }
 
   async findAll(): Promise<BookDTO[]> {
-    return this.prisma.book.findMany();
+    return this.prisma.book.findMany({
+      include: {
+        author: true,
+      },
+    });
   }
 
-  async update(id: string, data: BookDTO): Promise<HttpException> {
+  async update(id: string, data: BookDTO) {
     const bookExists: BookDTO = await this.prisma.book.findUnique({
       where: { id: Number(id) },
     });
@@ -50,17 +54,14 @@ export class BookService {
       throw new HttpException(`Livro não cadastrado`, HttpStatus.NOT_FOUND);
     }
 
-    await this.prisma.book.update({
+    const bookUpdate = await this.prisma.book.update({
       data,
       where: {
         id: Number(id),
       },
     });
 
-    throw new HttpException(
-      `Livro atualizado com sucesso`,
-      HttpStatus.ACCEPTED,
-    );
+    return bookUpdate;
   }
 
   async delete(id: string): Promise<HttpException> {
